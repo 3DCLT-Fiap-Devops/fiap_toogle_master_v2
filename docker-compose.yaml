@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # --- Databases ---
+  
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: toogle_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # --- Microservices ---
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.auth
+    image: auth-service
+    ports:
+      - "8001:8001"
+    environment:
+      - PORT=8001
+      - DATABASE_URL=postgres://user:password@postgres:5432/toogle_db?sslmode=disable
+      - MASTER_KEY=sua_chave_mestra_aqui
+    depends_on:
+      - postgres
+
+  flag-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.flag
+    image: flag-service
+    ports:
+      - "8002:8002"
+    environment:
+      - PORT=8002
+      - DATABASE_URL=postgres://user:password@postgres:5432/toogle_db?sslmode=disable
+      - AUTH_SERVICE_URL=http://auth-service:8001
+    depends_on:
+      - postgres
+      - auth-service
+
+  targeting-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.targeting
+    image: targeting-service
+    ports:
+      - "8003:8003"
+    environment:
+      - PORT=8003
+      - DATABASE_URL=postgres://user:password@postgres:5432/toogle_db?sslmode=disable
+      - AUTH_SERVICE_URL=http://auth-service:8001
+    depends_on:
+      - postgres
+      - auth-service
+
+  evaluation-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.evaluation
+    image: evaluation-service
+    ports:
+      - "8004:8004"
+    environment:
+      - PORT=8004
+      - REDIS_URL=redis://redis:6379
+      - FLAG_SERVICE_URL=http://flag-service:8002
+      - TARGETING_SERVICE_URL=http://targeting-service:8003
+      - AWS_REGION=us-east-1
+      - AWS_SQS_URL=https://sqs.us-east-1.amazonaws.com/123456789012/my-queue
+      - SERVICE_API_KEY=sua_chave_de_servico_aqui
+    depends_on:
+      - redis
+      - flag-service
+      - targeting-service
+
+  analytics-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.analytics
+    image: analytics-service
+    ports:
+      - "8005:8005"
+    environment:
+      - PORT=8005
+      - AWS_REGION=us-east-1
+      - AWS_SQS_URL=https://sqs.us-east-1.amazonaws.com/123456789012/my-queue
+      - AWS_DYNAMODB_TABLE=analytics_events
+    # Analytics geralmente roda em background processando SQS
+
+volumes:
+  postgres_data:

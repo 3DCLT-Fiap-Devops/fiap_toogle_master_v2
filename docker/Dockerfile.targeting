@@ -8,13 +8,13 @@ RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 WORKDIR /app
 
 # Copy the requirements file into the container
-COPY targeting-service/requirements.txt .
+COPY services/targeting-service/requirements.txt .
 
 # Install dependencies as root
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
-COPY targeting-service/ .
+COPY services/targeting-service/ .
 
 # Change ownership of the app directory to the non-root user
 RUN chown -R appuser:appgroup /app

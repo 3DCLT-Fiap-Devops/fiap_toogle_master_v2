@@ -4,13 +4,13 @@ FROM golang:1.21-alpine AS builder
 WORKDIR /app
 
 # Copy go mod and sum files
-COPY evaluation-service/go.mod evaluation-service/go.sum ./
+COPY services/evaluation-service/go.mod services/evaluation-service/go.sum ./
 
 # Download dependencies
 RUN go mod download
 
 # Copy the source code
-COPY evaluation-service/ .
+COPY services/evaluation-service/ .
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .

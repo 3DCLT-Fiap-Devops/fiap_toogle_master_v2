@@ -13,6 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   redis:
     image: redis:7-alpine
@@ -79,6 +80,8 @@ services:
       - TARGETING_SERVICE_URL=http://targeting-service:8003
       - AWS_REGION=us-east-1
       - AWS_SQS_URL=https://sqs.us-east-1.amazonaws.com/123456789012/my-queue
+      - AWS_ACCESS_KEY_ID=local
+      - AWS_SECRET_ACCESS_KEY=local
       - SERVICE_API_KEY=sua_chave_de_servico_aqui
     depends_on:
       - redis

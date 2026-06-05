@@ -1,0 +1,113 @@
+### ============================================================================
+### TOOGLE MASTER - API REQUESTS
+### ============================================================================
+### Este arquivo pode ser usado com a extensão "REST Client" no VS Code
+### ou no WebStorm para testar as APIs localmente.
+### ============================================================================
+
+@auth_host = http://localhost:8001
+@flag_host = http://localhost:8002
+@targeting_host = http://localhost:8003
+@evaluation_host = http://localhost:8004
+@analytics_host = http://localhost:8005
+
+# Substitua pelas chaves reais após cria-las
+@master_key = sua_chave_mestra_aqui
+@api_key = tm_key_b4e85e69296e57309571a703fe91dea54592ccf54a689434b96d06cad669a21f
+
+### ============================================================================
+### 1. AUTH SERVICE (Porta 8001)
+### ============================================================================
+
+### 1.1. Health Check
+GET {{auth_host}}/health
+
+### 1.2. Criar nova chave de API (Requer MASTER_KEY)
+# @name createKey
+POST {{auth_host}}/admin/keys
+Authorization: Bearer {{master_key}}
+Content-Type: application/json
+
+{
+    "name": "Chave do Flag Service"
+}
+
+### 1.3. Validar chave de API
+GET {{auth_host}}/validate
+Authorization: Bearer {{api_key}}
+
+
+### ============================================================================
+### 2. FLAG SERVICE (Porta 8002)
+### ============================================================================
+
+### 2.1. Health Check
+GET {{flag_host}}/health
+
+### 2.2. Criar uma nova Flag (Requer API KEY válida)
+POST {{flag_host}}/flags
+Authorization: Bearer {{api_key}}
+Content-Type: application/json
+
+{
+    "name": "new_checkout_flow",
+    "description": "Ativa o novo fluxo de checkout",
+    "is_enabled": true
+}
+
+### 2.3. Listar todas as Flags
+GET {{flag_host}}/flags
+Authorization: Bearer {{api_key}}
+
+### 2.4. Buscar uma Flag específica
+GET {{flag_host}}/flags/new_checkout_flow
+Authorization: Bearer {{api_key}}
+
+
+### ============================================================================
+### 3. TARGETING SERVICE (Porta 8003)
+### ============================================================================
+
+### 3.1. Health Check
+GET {{targeting_host}}/health
+
+### 3.2. Criar uma regra para uma Flag
+POST {{targeting_host}}/rules
+Authorization: Bearer {{api_key}}
+Content-Type: application/json
+
+{
+    "flag_name": "new_checkout_flow",
+    "is_enabled": true,
+    "rules": {
+        "type": "PERCENTAGE",
+        "value": 50.0
+    }
+}
+
+### 3.3. Buscar regra de uma Flag
+GET {{targeting_host}}/rules/new_checkout_flow
+Authorization: Bearer {{api_key}}
+
+
+### ============================================================================
+### 4. EVALUATION SERVICE (Porta 8004)
+### ============================================================================
+
+### 4.1. Health Check
+GET {{evaluation_host}}/health
+
+### 4.2. Avaliar uma Flag para um Usuário (Requer API KEY válida)
+# O Evaluation precisa se comunicar com Redis, Flag e Targeting para responder
+GET {{evaluation_host}}/evaluate?flag_name=new_checkout_flow&user_id=user_12345
+Authorization: Bearer {{api_key}}
+
+
+### ============================================================================
+### 5. ANALYTICS SERVICE (Porta 8005)
+### ============================================================================
+
+### 5.1. Health Check
+# Nota: O Analytics Service processa mensagens do SQS em background.
+# O endpoint HTTP serve apenas para health check.
+GET {{analytics_host}}/health

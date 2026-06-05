@@ -1,4 +1,16 @@
-Projetos relacionados
+# Inicio
+
+Execute o install.sh para aplicar os patches
+Rode docker compose up --build para subir rodar os containers
+Execute o smoke-test.sh para veriricar se todos os containers estão ok
+Importe a collection do postman e o arquivo de environments 
+
+
+
+
+# Projetos relacionados
+
+Como estes repositórios abaixo são de outra conta, utilizaremos a pasta `patches/` para conseguir aplicar as correções necessárias para os containers serem executados.
 
 ```
 git submodule add https://github.com/FIAP-TCs/auth-service auth-service
@@ -30,6 +42,6 @@ Comandos para build `docker build -t analytics -f docker/Dockerfile.analytics .`
 Para injetar a `.env` `docker run --env-file .env.prod analytics`
 
 
-Para gerar patch: 
+Para gerar patchs: 
 
 git submodule foreach 'git diff HEAD > ../../patches/$name.patch'   

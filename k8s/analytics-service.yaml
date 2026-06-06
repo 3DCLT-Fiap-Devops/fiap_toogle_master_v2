@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: analytics-service-config
+  namespace: toogle-master
+data:
+  PORT: "8005"
+  AWS_REGION: "us-east-1"
+  AWS_DYNAMODB_TABLE: "analytics_events"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: analytics-service-secret
+  namespace: toogle-master
+type: Opaque
+data:
+  # AWS_SQS_URL: https://sqs.us-east-1.amazonaws.com/123456789012/toogle-events
+  AWS_SQS_URL: aHR0cHM6Ly9zcXMudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vMTIzNDU2Nzg5MDEyL3Rvb2dsZS1ldmVudHM=
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service
+  namespace: toogle-master
+spec:
+  selector:
+    app: analytics-service
+  ports:
+    - protocol: TCP
+      port: 8005
+      targetPort: 8005
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  namespace: toogle-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+    spec:
+      containers:
+      - name: analytics-service
+        image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/analytics-service:latest
+        ports:
+        - containerPort: 8005
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: analytics-service-config
+              key: PORT
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: analytics-service-config
+              key: AWS_REGION
+        - name: AWS_DYNAMODB_TABLE
+          valueFrom:
+            configMapKeyRef:
+              name: analytics-service-config
+              key: AWS_DYNAMODB_TABLE
+        - name: AWS_SQS_URL
+          valueFrom:
+            secretKeyRef:
+              name: analytics-service-secret
+              key: AWS_SQS_URL
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8005
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8005
+          initialDelaySeconds: 10
+          periodSeconds: 10
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: analytics-service-hpa
+  namespace: toogle-master
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: analytics-service
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

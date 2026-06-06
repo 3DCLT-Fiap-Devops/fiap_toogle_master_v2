@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evaluation-service-config
+  namespace: toogle-master
+data:
+  PORT: "8004"
+  FLAG_SERVICE_URL: "http://flag-service.toogle-master.svc.cluster.local:8002"
+  TARGETING_SERVICE_URL: "http://targeting-service.toogle-master.svc.cluster.local:8003"
+  AWS_REGION: "us-east-1"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: evaluation-service-secret
+  namespace: toogle-master
+type: Opaque
+data:
+  # REDIS_URL: redis://redis-endpoint:6379
+  REDIS_URL: cmVkaXM6Ly9yZWRpcy1lbmRwb2ludDo2Mzc5
+  # AWS_SQS_URL: https://sqs.us-east-1.amazonaws.com/123456789012/toogle-events
+  AWS_SQS_URL: aHR0cHM6Ly9zcXMudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vMTIzNDU2Nzg5MDEyL3Rvb2dsZS1ldmVudHM=
+  # SERVICE_API_KEY: tm_key_...
+  SERVICE_API_KEY: dG1fa2V5X2Y1NGI4MWJjMTYxYTViODRjMjc3ZWQ5NTQzODRhZTk1MGM4N2FkYjhjNzk1ODkyZGI0YWJmYWVmNzVhYWFjYWI=
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evaluation-service
+  namespace: toogle-master
+spec:
+  selector:
+    app: evaluation-service
+  ports:
+    - protocol: TCP
+      port: 8004
+      targetPort: 8004
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evaluation-service
+  namespace: toogle-master
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: evaluation-service
+  template:
+    metadata:
+      labels:
+        app: evaluation-service
+    spec:
+      containers:
+      - name: evaluation-service
+        image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/evaluation-service:latest
+        ports:
+        - containerPort: 8004
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: evaluation-service-config
+              key: PORT
+        - name: FLAG_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: evaluation-service-config
+              key: FLAG_SERVICE_URL
+        - name: TARGETING_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: evaluation-service-config
+              key: TARGETING_SERVICE_URL
+        - name: AWS_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: evaluation-service-config
+              key: AWS_REGION
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: evaluation-service-secret
+              key: REDIS_URL
+        - name: AWS_SQS_URL
+          valueFrom:
+            secretKeyRef:
+              name: evaluation-service-secret
+              key: AWS_SQS_URL
+        - name: SERVICE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: evaluation-service-secret
+              key: SERVICE_API_KEY
+        resources:
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8004
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: evaluation-service-hpa
+  namespace: toogle-master
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: evaluation-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70

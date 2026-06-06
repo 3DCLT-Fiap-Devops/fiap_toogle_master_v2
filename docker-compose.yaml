@@ -3,22 +3,63 @@ version: '3.8'
 services:
   # --- Databases ---
   
-  postgres:
+  postgres-auth:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: toogle_db
+      POSTGRES_DB: auth_db
+    ports:
+      - "5431:5432"
+    volumes:
+      - ./docker/init-auth.sql:/docker-entrypoint-initdb.d/init.sql
+
+  postgres-main:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: main_db
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/init-main.sql:/docker-entrypoint-initdb.d/init.sql
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ."
+
+  localstack:
+    image: localstack/localstack:3.4
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - DEFAULT_REGION=us-east-1
+
+  # --- Setup AWS Resources ---
+  setup-aws:
+    image: amazon/aws-cli
+    depends_on:
+      - localstack
+      - dynamodb-local
+    environment:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    entrypoint: /bin/sh -c
+    command: >
+      "sleep 10 &&
+      aws sqs create-queue --queue-name toogle-events --endpoint-url http://localstack:4566 &&
+      aws dynamodb create-table --table-name analytics_events --attribute-definitions AttributeName=event_id,AttributeType=S --key-schema AttributeName=event_id,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 --endpoint-url http://dynamodb-local:8000 &&
+      echo 'AWS resources initialized'"
 
   # --- Microservices ---
 
@@ -27,28 +68,30 @@ services:
       context: .
       dockerfile: docker/Dockerfile.auth
     image: auth-service
+    restart: always
     ports:
       - "8001:8001"
     environment:
       - PORT=8001
-      - DATABASE_URL=postgres://user:password@postgres:5432/toogle_db?sslmode=disable
+      - DATABASE_URL=postgres://user:password@postgres-auth:5432/auth_db?sslmode=disable
       - MASTER_KEY=sua_chave_mestra_aqui
     depends_on:
-      - postgres
+      - postgres-auth
 
   flag-service:
     build:
       context: .
       dockerfile: docker/Dockerfile.flag
     image: flag-service
+    restart: always
     ports:
       - "8002:8002"
     environment:
       - PORT=8002
-      - DATABASE_URL=postgres://user:password@postgres:5432/toogle_db?sslmode=disable
+      - DATABASE_URL=postgres://user:password@postgres-main:5432/main_db?sslmode=disable
       - AUTH_SERVICE_URL=http://auth-service:8001
     depends_on:
-      - postgres
+      - postgres-main
       - auth-service
 
   targeting-service:
@@ -56,14 +99,15 @@ services:
       context: .
       dockerfile: docker/Dockerfile.targeting
     image: targeting-service
+    restart: always
     ports:
       - "8003:8003"
     environment:
       - PORT=8003
-      - DATABASE_URL=postgres://user:password@postgres:5432/toogle_db?sslmode=disable
+      - DATABASE_URL=postgres://user:password@postgres-main:5432/main_db?sslmode=disable
       - AUTH_SERVICE_URL=http://auth-service:8001
     depends_on:
-      - postgres
+      - postgres-main
       - auth-service
 
   evaluation-service:
@@ -71,6 +115,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.evaluation
     image: evaluation-service
+    restart: always
     ports:
       - "8004:8004"
     environment:
@@ -79,28 +124,34 @@ services:
       - FLAG_SERVICE_URL=http://flag-service:8002
       - TARGETING_SERVICE_URL=http://targeting-service:8003
       - AWS_REGION=us-east-1
-      - AWS_SQS_URL=https://sqs.us-east-1.amazonaws.com/123456789012/my-queue
-      - AWS_ACCESS_KEY_ID=local
-      - AWS_SECRET_ACCESS_KEY=local
+      - AWS_SQS_URL=http://localstack:4566/000000000000/toogle-events
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
       - SERVICE_API_KEY=tm_key_f54b81bc161a5b84c277ed954384ae950c87adb8c795892db4abfaef75aaacab
     depends_on:
       - redis
       - flag-service
       - targeting-service
+      - localstack
 
   analytics-service:
     build:
       context: .
       dockerfile: docker/Dockerfile.analytics
     image: analytics-service
+    restart: always
     ports:
       - "8005:8005"
     environment:
       - PORT=8005
       - AWS_REGION=us-east-1
-      - AWS_SQS_URL=https://sqs.us-east-1.amazonaws.com/123456789012/my-queue
+      - AWS_SQS_URL=http://localstack:4566/000000000000/toogle-events
+      - AWS_ENDPOINT_URL=http://localstack:4566
       - AWS_DYNAMODB_TABLE=analytics_events
-    # Analytics geralmente roda em background processando SQS
-
-volumes:
-  postgres_data:
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    depends_on:
+      - localstack
+      - dynamodb-local
+      - setup-aws

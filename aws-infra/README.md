@@ -45,6 +45,21 @@ Or run individual scripts:
 ./redis.sh
 ```
 
+## Build and Push Docker Images
+
+Once the ECR repositories are created, you can build and push the images:
+
+```bash
+chmod +x build-and-push.sh
+./build-and-push.sh
+```
+
+This script:
+1. Detects your AWS Account ID and Region.
+2. Performs `docker login` to ECR.
+3. Builds all 5 microservices using the Dockerfiles in `docker/`.
+4. Tags and pushes them to your ECR registries.
+
 ## Cleanup (Delete All)
 
 To delete all provisioned resources and clean up the `outputs` directory:

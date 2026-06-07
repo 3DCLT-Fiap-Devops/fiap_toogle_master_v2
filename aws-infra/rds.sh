@@ -2,6 +2,7 @@
 
 # RDS Postgres Instances
 # 2x 20GB t3.medium
+PASSWORD="SenhaTeste123"
 
 echo "Creating RDS Postgres Instance: auth-db..."
 aws rds create-db-instance \
@@ -10,7 +11,7 @@ aws rds create-db-instance \
     --engine postgres \
     --allocated-storage 20 \
     --master-username "dbuser" \
-    --master-user-password "change-me-securely" \
+    --master-user-password "$PASSWORD" \
     --backup-retention-period 7 \
     --publicly-accessible \
     --tags Key=Project,Value=ToogleMaster Key=Service,Value=Auth > outputs/rds-auth.json
@@ -22,7 +23,7 @@ aws rds create-db-instance \
     --engine postgres \
     --allocated-storage 20 \
     --master-username "dbuser" \
-    --master-user-password "change-me-securely" \
+    --master-user-password "$PASSWORD" \
     --backup-retention-period 7 \
     --publicly-accessible \
     --tags Key=Project,Value=ToogleMaster Key=Service,Value=Core > outputs/rds-main.json

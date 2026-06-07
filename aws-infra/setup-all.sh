@@ -16,6 +16,6 @@ chmod +x "$SCRIPT_DIR/modules/"*.sh
 "$SCRIPT_DIR/modules/sqs.sh"
 "$SCRIPT_DIR/modules/dynamodb.sh"
 "$SCRIPT_DIR/modules/redis.sh"
-"$SCRIPT_DIR/modules/eks.sh"
+# "$SCRIPT_DIR/modules/eks.sh"
 
 echo "Provisioning requests sent. Please monitor the AWS Console for completion status."

@@ -40,8 +40,58 @@ aws dynamodb delete-table --table-name analytics_events
 echo "Deleting ElastiCache Redis Cluster: toogle-redis..."
 aws elasticache delete-cache-cluster --cache-cluster-id toogle-redis
 
-# 6. Clean up output files
-echo "Cleaning up local output files..."
-rm -rf outputs/*.json
+# 6. Delete Networking Resources (Dedicated VPC)
+echo "Cleaning up networking resources..."
+
+# Fetch VPC ID
+VPC_ID=$(aws ec2 describe-vpcs --filters "Name=tag:Name,Values=toogle-vpc" --query 'Vpcs[0].VpcId' --output text 2>/dev/null)
+
+if [ ! -z "$VPC_ID" ] && [ "$VPC_ID" != "None" ]; then
+    echo "Found VPC: $VPC_ID. Starting teardown..."
+
+    # Delete Subnet Groups (RDS and Redis)
+    echo "Deleting Subnet Groups..."
+    aws rds delete-db-subnet-group --db-subnet-group-name "toogle-db-subnet-group" 2>/dev/null
+    aws elasticache delete-cache-subnet-group --cache-subnet-group-name "toogle-cache-subnet-group" 2>/dev/null
+
+    # Delete Security Group
+    SG_ID=$(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC_ID" "Name=group-name,Values=toogle-master-sg" --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null)
+    if [ ! -z "$SG_ID" ] && [ "$SG_ID" != "None" ]; then
+        echo "Deleting Security Group: $SG_ID"
+        aws ec2 delete-security-group --group-id "$SG_ID"
+    fi
+
+    # Delete Subnets
+    SUBNET_IDS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC_ID" --query 'Subnets[*].SubnetId' --output text)
+    for sid in $SUBNET_IDS; do
+        echo "Deleting Subnet: $sid"
+        aws ec2 delete-subnet --subnet-id "$sid"
+    done
+
+    # Delete Route Tables (non-main)
+    RT_IDS=$(aws ec2 describe-route-tables --filters "Name=vpc-id,Values=$VPC_ID" --query 'RouteTables[?Associations[0].Main!=`true`].RouteTableId' --output text)
+    for rtid in $RT_IDS; do
+        echo "Deleting Route Table: $rtid"
+        aws ec2 delete-route-table --route-table-id "$rtid"
+    done
+
+    # Detach and Delete Internet Gateway
+    IGW_ID=$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC_ID" --query 'InternetGateways[0].InternetGatewayId' --output text 2>/dev/null)
+    if [ ! -z "$IGW_ID" ] && [ "$IGW_ID" != "None" ]; then
+        echo "Detaching and Deleting IGW: $IGW_ID"
+        aws ec2 detach-internet-gateway --internet-gateway-id "$IGW_ID" --vpc-id "$VPC_ID"
+        aws ec2 delete-internet-gateway --internet-gateway-id "$IGW_ID"
+    fi
+
+    # Finally, Delete VPC
+    echo "Deleting VPC: $VPC_ID"
+    aws ec2 delete-vpc --vpc-id "$VPC_ID"
+else
+    echo "Dedicated VPC 'toogle-vpc' not found. Skipping networking cleanup."
+fi
+
+# 7. Clean up local files
+echo "Cleaning up local files..."
+rm -f deployment-summary.txt
 
 echo "Deletion requests sent. Resources may take a few minutes to be fully removed."

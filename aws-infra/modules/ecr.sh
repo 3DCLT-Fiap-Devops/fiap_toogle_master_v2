@@ -9,5 +9,5 @@ for service in "${SERVICES[@]}"; do
     aws ecr create-repository \
         --repository-name "$service" \
         --image-scanning-configuration scanOnPush=true \
-        --tags Key=Project,Value=ToogleMaster > "outputs/ecr-$service.json"
+        --tags Key=Project,Value=ToogleMaster
 done

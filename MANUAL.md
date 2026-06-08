@@ -26,3 +26,6 @@ Para injetar a .env docker run --env-file .env.prod analytics
 Para gerar patchs:
 
 git submodule foreach 'git diff HEAD > ../../patches/$name.patch'
+
+Powershell:
+`docker run -p 8089:8089 -v "$(pwd)/tests:/mnt/locust" locustio/locust -f /mnt/locust/locustfile.py`

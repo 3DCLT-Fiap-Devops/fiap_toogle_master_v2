@@ -1,3 +1,19 @@
 node_modules/
 __pycache__/
 *.pyc
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+_override.tf
+_override.tf.json
+.terraformrc
+terraform.rc
+terraform/.terraform.lock.hcl
+terraform/.terraform.tfstate.lock.info
+deployment-summary.txt

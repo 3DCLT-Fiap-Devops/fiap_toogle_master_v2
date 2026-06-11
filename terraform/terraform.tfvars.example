@@ -1,0 +1,4 @@
+region        = "us-east-1"
+db_password   = "SuaSenhaAqui"
+lab_role_name = "LabRole"
+project_name  = "ToogleMaster"

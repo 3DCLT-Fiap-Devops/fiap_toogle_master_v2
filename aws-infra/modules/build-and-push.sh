@@ -27,8 +27,13 @@ DOCKERFILES["evaluation-service"]="docker/Dockerfile.evaluation"
 DOCKERFILES["flag-service"]="docker/Dockerfile.flag"
 DOCKERFILES["targeting-service"]="docker/Dockerfile.targeting"
 
+# Get the directory where the script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# The project root is two levels up from aws-infra/modules/
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
 # We run from the project root to ensure build context is correct
-cd ..
+cd "$PROJECT_ROOT"
 
 for service in "${SERVICES[@]}"; do
     echo "--------------------------------------------------------"

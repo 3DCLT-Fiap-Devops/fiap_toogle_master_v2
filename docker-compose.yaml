@@ -146,6 +146,7 @@ services:
       - AWS_REGION=us-east-1
       - AWS_SQS_URL=http://localstack:4566/000000000000/toogle-events
       - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_DYNAMODB_ENDPOINT_URL=http://dynamodb-local:8000
       - AWS_DYNAMODB_TABLE=analytics_events
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test

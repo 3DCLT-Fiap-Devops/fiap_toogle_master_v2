@@ -90,11 +90,11 @@
 - [x] Mostrar os 5 microsserviços rodando como Pods (`kubectl get pods`) `[AB]`
 - [x] Demonstrar o Nginx Ingress funcionando via `curl` ou Postman na URL do Load Balancer `[AB]`
 - [x] Gerar carga no evaluation-service e mostrar HPA escalando réplicas (`kubectl get hpa` e `kubectl get pods`) `[AB]`
-- [ ] Enviar mensagens para a fila SQS e mostrar escala do analytics-service (HPA ou KEDA) `[AB]`
-- [ ] Mostrar dados aparecendo na tabela DynamoDB `[AB]`
-- [ ] Explicar a arquitetura e os desafios encontrados (ex: limitações da LabRole) `[AB]`
-- [ ] Explicar a escolha de escalabilidade do analytics-service (HPA por CPU ou KEDA por fila) `[AB]`
-- [ ] Explicar a diferença de propósito entre RDS, ElastiCache e DynamoDB `[AB]`
+- [x] Enviar mensagens para a fila SQS e mostrar escala do analytics-service (HPA ou KEDA) `[AB]`
+- [x] Mostrar dados aparecendo na tabela DynamoDB `[AB]`
+- [x] Explicar a arquitetura e os desafios encontrados (ex: limitações da LabRole) `[AB]`
+- [x] Explicar a escolha de escalabilidade do analytics-service (HPA por CPU ou KEDA por fila) `[AB]`
+- [x] Explicar a diferença de propósito entre RDS, ElastiCache e DynamoDB `[AB]`
 
 ---
 

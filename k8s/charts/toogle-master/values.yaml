@@ -19,8 +19,8 @@ services:
     image: auth-service
     tag: latest
     port: 8001
-    dbUrl: "cG9zdGdyZXM6Ly91c2VyOnBhc3N3b3JkQHJkcy1lbmRwb2ludDo1NDMyL2F1dGhfZGI="
-    masterKey: "c3VhX2NoYXZlX21lc3RyYV9hcXVp"
+    dbUrl: "postgres://dbuser:SenhaTeste123@auth-db-endpoint:5432/auth_db"
+    masterKey: "sua_chave_mestra_aqui"
     resources:
       requests:
         cpu: 100m
@@ -34,7 +34,7 @@ services:
     image: flag-service
     tag: latest
     port: 8002
-    dbUrl: "cG9zdGdyZXM6Ly91c2VyOnBhc3N3b3JkQHJkcy1lbmRwb2ludDo1NDMyL2ZsYWdfZGI="
+    dbUrl: "postgres://dbuser:SenhaTeste123@main-db-endpoint:5432/flag_db"
     resources:
       requests:
         cpu: 100m
@@ -48,7 +48,7 @@ services:
     image: targeting-service
     tag: latest
     port: 8003
-    dbUrl: "cG9zdGdyZXM6Ly91c2VyOnBhc3N3b3JkQHJkcy1lbmRwb2ludDo1NDMyL3RhcmdldGluZ19kYg=="
+    dbUrl: "postgres://dbuser:SenhaTeste123@targeting-db-endpoint:5432/targeting_db"
     resources:
       requests:
         cpu: 100m
@@ -62,9 +62,9 @@ services:
     image: evaluation-service
     tag: latest
     port: 8004
-    redisUrl: "cmVkaXM6Ly9yZWRpcy1lbmRwb2ludDo2Mzc5"
-    sqsUrl: "aHR0cHM6Ly9zcXMudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vMTIzNDU2Nzg5MDEyL3Rvb2dsZS1ldmVudHM="
-    apiKey: "dG1fa2V5X2Y1NGI4MWJjMTYxYTViODRjMjc3ZWQ5NTQzODRhZTk1MGM4N2FkYjhjNzk1ODkyZGI0YWJmYWVmNzVhYWFjYWI="
+    redisUrl: "redis://redis-endpoint:6379"
+    sqsUrl: "https://sqs.us-east-1.amazonaws.com/123456789012/toogle-events"
+    apiKey: "tm_key_f54b81bc161a5b84c277ed954384ae950c87adb8c795892db4abfaef75aaacab"
     resources:
       requests:
         cpu: 200m
@@ -83,7 +83,7 @@ services:
     image: analytics-service
     tag: latest
     port: 8005
-    sqsUrl: "aHR0cHM6Ly9zcXMudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vMTIzNDU2Nzg5MDEyL3Rvb2dsZS1ldmVudHM="
+    sqsUrl: "https://sqs.us-east-1.amazonaws.com/123456789012/toogle-events"
     dbTable: "analytics_events"
     resources:
       requests:
@@ -97,3 +97,8 @@ services:
       minReplicas: 1
       maxReplicas: 5
       targetCPU: 70
+
+awsCredentials:
+  accessKey: ""
+  secretKey: ""
+  sessionToken: ""

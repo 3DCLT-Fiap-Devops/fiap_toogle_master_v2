@@ -6,11 +6,11 @@
 ### ============================================================================
 
 # Substitua pelo DNS do seu LoadBalancer (ADDRESS obtido via: kubectl get ingress -n toogle-master)
-@lb_host = http://ab4de0645d0454c1cb406eb6431474f7-d1a7169f179500d0.elb.us-east-1.amazonaws.com
+@lb_host = http://a2a13d80fe0124732aa22c39b9f4859b-4021c9fb7be300aa.elb.us-east-1.amazonaws.com
 
 # Substitua pelas chaves reais configuradas no deployment-summary.txt / Secrets
 @master_key = sua_chave_mestra_aqui
-@api_key = tm_key_f54b81bc161a5b84c277ed954384ae950c87adb8c795892db4abfaef75aaacab
+@api_key = tm_key_6516264eb71b090543abff826b511e9085ff8a558972bc1c17483d0dfb30b4c4
 
 ### ============================================================================
 ### 1. AUTH SERVICE (Path: /auth)

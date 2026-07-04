@@ -13,7 +13,7 @@
 
 # Substitua pelas chaves reais após cria-las
 @master_key = sua_chave_mestra_aqui
-@api_key = tm_key_b4e85e69296e57309571a703fe91dea54592ccf54a689434b96d06cad669a21f
+@api_key = tm_key_fe9f3db5d2d3e40dc2bbb753ed1c50a12da0677a9a58e26d983a3bd0c5ea30b0
 
 ### ============================================================================
 ### 1. AUTH SERVICE (Porta 8001)
@@ -50,7 +50,7 @@ Authorization: Bearer {{api_key}}
 Content-Type: application/json
 
 {
-    "name": "new_checkout_flow",
+    "name": "testenovo3",
     "description": "Ativa o novo fluxo de checkout",
     "is_enabled": true
 }
@@ -60,7 +60,7 @@ GET {{flag_host}}/flags
 Authorization: Bearer {{api_key}}
 
 ### 2.4. Buscar uma Flag específica
-GET {{flag_host}}/flags/new_checkout_flow
+GET {{flag_host}}/flags/testenovo
 Authorization: Bearer {{api_key}}
 
 
@@ -77,11 +77,11 @@ Authorization: Bearer {{api_key}}
 Content-Type: application/json
 
 {
-    "flag_name": "new_checkout_flow",
+    "flag_name": "testenovo3",
     "is_enabled": true,
     "rules": {
         "type": "PERCENTAGE",
-        "value": 50.0
+        "value": 90.0
     }
 }
 

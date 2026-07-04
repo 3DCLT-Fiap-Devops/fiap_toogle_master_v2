@@ -16,9 +16,11 @@ metadata:
   namespace: toogle-master
 type: Opaque
 data:
-  # AWS_SQS_URL: https://sqs.us-east-1.amazonaws.com/123456789012/toogle-events
-  AWS_SQS_URL: aHR0cHM6Ly9zcXMudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vMTIzNDU2Nzg5MDEyL3Rvb2dsZS1ldmVudHM=
-
+  # AWS_SQS_URL: aHR0cHM6Ly9zcXMudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vMTEyNzE5MTExMjk3L3Rvb2dsZS1ldmVudHM=
+  AWS_SQS_URL: aHR0cHM6Ly9zcXMudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20vMTEyNzE5MTExMjk3L3Rvb2dsZS1ldmVudHM=
+  AWS_ACCESS_KEY_ID: QVNJQVJVUFVWRVNBUzVIMkFSWlg=
+  AWS_SECRET_ACCESS_KEY: TmV6TXhlRDRybi9uQllPMmFVdEcvWXMrMEI2SEMrUExZZGhXdDRiZw==
+  AWS_SESSION_TOKEN: SVFvSmIzSnBaMmx1WDJWakVHTWFDWFZ6TFhkbGMzUXRNaUpITUVVQ0lRRG1nTytocE51V1pVNXdONy9JdUR1R2k5M1hNZWxreUZIdEhuU1R4Qm55T3dJZ1dTSU1ob1BuTnFGcHh2M1BSUnhoMmJpejZ3Qzl0aDZrYjNad2l2ODYvYzRxckFJSUxCQUJHZ3d4TVRJM01Ua3hNVEV5T1RjaURGbDBUa3pjYURVbXdMZU5OQ3FKQWpqYWl4Wk4zSDhFdXpaanNZQXhyOUtFeE9tNWVTellqM25IT3ZhK25SYnJpbWNKZ3Q1eDBRZ3VLMzJMRGx3Q083bUl5ZkFIK1hhQWRNL3BPSTNqcGVUK1ZMaXhlb3QvRW81NnZsSzdlSVVid2c0NXlpbC91dUJaZjlSbjY1T3FCYWZTT1ZPVlFDaFpneURaYitzaTBaQzlBYzFXYTV4RlNNeVhISFBGSncwSTBkYzkyN0RrdFhTbFNtVkNzVjhBQUdxTUVNZjE1MXVOODR1TmdwcUx0a1FDd1h0RzVqdld5dVNPeFFSb09VdEFpZFZXZlk4LzkveGlBWnZLbEJzK3RpTE1GRWR5cDhSVDJHMldua2xCQU16SFpJZUVEVUg0NjFDZFcxU29BRVoyQSszR25GZXh6YTVhaWhRYmVLK2EzN09ZN2tVUE1rdjRrZjJQR2xLVnJyS0Z1SWQ1Qm92bVM4a3c2S3lsMGdZNm5RR1FGa0kySURiUi80M0JpQmVpNmxzRFgybCtpUGpxZGNPN1E5eE1FSllSY2xldElHZUd3TjIyeklyN3pEcnNZZ29ZdzdnYUhiN2RhQzIxb3JkUkNhSC9Ydi92SmhISGRrblpoTE54VFdJWWtmUjRyNmtUdHE1R0tYU0tNUjVFclNsSGo1ekVmV1Q4bUhhc2NTbVRHeFUvMUZCVWh5VEtBeTZQY1U2Q2p2Umo4Um95M0JiZFBuSE4zNjU4T0FiM2N4YWJHVlJsQjlIaUxwRXdFb1Fp
 ---
 apiVersion: v1
 kind: Service
@@ -52,7 +54,7 @@ spec:
     spec:
       containers:
       - name: analytics-service
-        image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/analytics-service:latest
+        image: 112719111297.dkr.ecr.us-east-1.amazonaws.com/analytics-service:latest
         ports:
         - containerPort: 8005
         env:
@@ -76,6 +78,24 @@ spec:
             secretKeyRef:
               name: analytics-service-secret
               key: AWS_SQS_URL
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: analytics-service-secret
+              key: AWS_ACCESS_KEY_ID
+              optional: true
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: analytics-service-secret
+              key: AWS_SECRET_ACCESS_KEY
+              optional: true
+        - name: AWS_SESSION_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: analytics-service-secret
+              key: AWS_SESSION_TOKEN
+              optional: true
         resources:
           requests:
             cpu: "100m"

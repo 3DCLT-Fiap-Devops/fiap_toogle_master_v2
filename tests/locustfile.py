@@ -9,10 +9,10 @@ class ToogleUser(HttpUser):
         # O serviço espera os parâmetros via Query String, não via JSON body
         params = {
             "flag_name": "test-flag",
-            "user_id": "user-123"
+            "user_id": "user_12345"
         }
         headers = {
-            "x-api-key": "tm_key_f54b81bc161a5b84c277ed954384ae950c87adb8c795892db4abfaef75aaacab"
+            "x-api-key": "tm_key_e75478d580db130091a5ec327ac4b240ee9600bff3a600e10329bf67ba671602"
         }
-        # Faz a requisição com os parâmetros na URL
-        self.client.get("/evaluate", params=params, headers=headers)
+        # Faz a requisição com os parâmetros na URL (apropriado para o Ingress)
+        self.client.get("/evaluate/evaluate", params=params, headers=headers)

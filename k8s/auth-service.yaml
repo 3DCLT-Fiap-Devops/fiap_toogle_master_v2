@@ -15,9 +15,9 @@ metadata:
 type: Opaque
 data:
   # Values are placeholders, must be replaced with real base64 values
-  # DATABASE_URL: postgres://user:password@rds-endpoint:5432/auth_db
-  DATABASE_URL: cG9zdGdyZXM6Ly91c2VyOnBhc3N3b3JkQHJkcy1lbmRwb2ludDo1NDMyL2F1dGhfZGI=
-  # MASTER_KEY: sua_chave_mestra_aqui
+  # DATABASE_URL: cG9zdGdyZXM6Ly9kYnVzZXI6U2VuaGFUZXN0ZTEyM0BhdXRoLWRiLmMzZzZrbzhwbXF0Mi51cy1lYXN0LTEucmRzLmFtYXpvbmF3cy5jb206NTQzMi9hdXRoX2Ri
+  DATABASE_URL: cG9zdGdyZXM6Ly9kYnVzZXI6U2VuaGFUZXN0ZTEyM0BhdXRoLWRiLmMzZzZrbzhwbXF0Mi51cy1lYXN0LTEucmRzLmFtYXpvbmF3cy5jb206NTQzMi9hdXRoX2Ri
+  # MASTER_KEY: c3VhX2NoYXZlX21lc3RyYV9hcXVp
   MASTER_KEY: c3VhX2NoYXZlX21lc3RyYV9hcXVp
 
 ---
@@ -53,7 +53,7 @@ spec:
     spec:
       containers:
       - name: auth-service
-        image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/auth-service:latest
+        image: 112719111297.dkr.ecr.us-east-1.amazonaws.com/auth-service:latest
         ports:
         - containerPort: 8001
         env:

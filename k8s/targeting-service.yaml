@@ -15,8 +15,8 @@ metadata:
   namespace: toogle-master
 type: Opaque
 data:
-  # DATABASE_URL: postgres://user:password@rds-endpoint:5432/targeting_db
-  DATABASE_URL: cG9zdGdyZXM6Ly91c2VyOnBhc3N3b3JkQHJkcy1lbmRwb2ludDo1NDMyL3RhcmdldGluZ19kYg==
+  # DATABASE_URL: cG9zdGdyZXM6Ly9kYnVzZXI6U2VuaGFUZXN0ZTEyM0B0YXJnZXRpbmctZGIuYzNnNmtvOHBtcXQyLnVzLWVhc3QtMS5yZHMuYW1hem9uYXdzLmNvbTo1NDMyL3RhcmdldGluZ19kYg==
+  DATABASE_URL: cG9zdGdyZXM6Ly9kYnVzZXI6U2VuaGFUZXN0ZTEyM0B0YXJnZXRpbmctZGIuYzNnNmtvOHBtcXQyLnVzLWVhc3QtMS5yZHMuYW1hem9uYXdzLmNvbTo1NDMyL3RhcmdldGluZ19kYg==
 
 ---
 apiVersion: v1
@@ -40,7 +40,7 @@ metadata:
   name: targeting-service
   namespace: toogle-master
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: targeting-service
@@ -51,7 +51,7 @@ spec:
     spec:
       containers:
       - name: targeting-service
-        image: <ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/targeting-service:latest
+        image: 112719111297.dkr.ecr.us-east-1.amazonaws.com/targeting-service:latest
         ports:
         - containerPort: 8003
         env:
@@ -75,17 +75,21 @@ spec:
             cpu: "100m"
             memory: "128Mi"
           limits:
-            cpu: "200m"
+            cpu: "500m"
             memory: "256Mi"
         livenessProbe:
           httpGet:
             path: /health
             port: 8003
           initialDelaySeconds: 15
-          periodSeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 5
         readinessProbe:
           httpGet:
             path: /health
             port: 8003
           initialDelaySeconds: 10
-          periodSeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5

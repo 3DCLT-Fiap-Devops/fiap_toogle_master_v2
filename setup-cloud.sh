@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Master Setup Script for ToogleMaster AWS Infrastructure
-# Provisions with Terraform and deploys application config in one go.
+# Provisions with Terraform and deploys application config using Kustomize in one go.
 
 set -e
 
@@ -16,36 +16,32 @@ terraform init
 terraform apply -auto-approve
 
 # 2. Application Deployment Tasks
-echo "Step 2: Running Post-Provisioning Tasks (Build, Seed, Patch)..."
-# We bypass the interactive menu of deploy-helper.sh by calling the steps directly
+echo "Step 2: Running Post-Provisioning Tasks (Build, Seed, Kustomize)..."
 ROOT_DIR=$(cd ".." && pwd)
 
-# Generate the summary first
+# Generate the K8s .env files from Terraform outputs
 ./deploy-helper.sh <<EOF
 5
 EOF
 
-# Manually trigger the steps in sequence
+# Build and Push ECR Docker images
 echo "Building and Pushing images..."
 cd "$ROOT_DIR/aws-infra/modules" && sh build-and-push.sh
 
+# Seed Databases (reads endpoints directly from k8s/*.env)
 echo "Seeding databases..."
-cp "$ROOT_DIR/deployment-summary.txt" "$ROOT_DIR/aws-infra/deployment-summary.txt"
 cd "$ROOT_DIR/aws-infra" && sh seed-databases.sh
 
-echo "Patching K8s manifests..."
-sh apply-k8s-patches.sh
-
-
-# Caso vá rodar localmente, basta comentar as linhas abaixo e usar o kubectl localmente
-aws eks update-kubeconfig --region us-east-1 --name toogle-cluster
-# kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml # Instalação do Ingress Controller para AWS
-
+# Configure credentials and deploy EKS using Kustomize
 echo "========================================================"
 echo "INFRASTRUCTURE AND CONFIGURATION COMPLETE!"
 echo "========================================================"
-echo "Deploying to EKS..."
-kubectl apply -f "$ROOT_DIR/k8s/namespace.yaml"
-kubectl apply -f "$ROOT_DIR/k8s/"
+echo "Deploying to EKS via Kustomize..."
+
+# Update EKS Kubeconfig
+aws eks update-kubeconfig --region us-east-1 --name toogle-cluster
+
+# Run Kustomize deploy script (generates secrets and applies kubectl apply -k)
+cd "$ROOT_DIR" && python deploy-credentials.py
 
 echo "Setup complete. You can access the application via the LoadBalancer DNS."

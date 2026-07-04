@@ -8,15 +8,6 @@ data:
   AUTH_SERVICE_URL: "http://auth-service.toogle-master.svc.cluster.local:8001"
 
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: targeting-service-secret
-  namespace: toogle-master
-type: Opaque
-data:
-  # DATABASE_URL: cG9zdGdyZXM6Ly9kYnVzZXI6U2VuaGFUZXN0ZTEyM0B0YXJnZXRpbmctZGIuYzNnNmtvOHBtcXQyLnVzLWVhc3QtMS5yZHMuYW1hem9uYXdzLmNvbTo1NDMyL3RhcmdldGluZ19kYg==
-  DATABASE_URL: cG9zdGdyZXM6Ly9kYnVzZXI6U2VuaGFUZXN0ZTEyM0B0YXJnZXRpbmctZGIuYzNnNmtvOHBtcXQyLnVzLWVhc3QtMS5yZHMuYW1hem9uYXdzLmNvbTo1NDMyL3RhcmdldGluZ19kYg==
 
 ---
 apiVersion: v1

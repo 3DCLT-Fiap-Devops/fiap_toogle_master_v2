@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - metrics-server.yaml
+  - auth-service.yaml
+  - flag-service.yaml
+  - targeting-service.yaml
+  - evaluation-service.yaml
+  - analytics-service.yaml
+  - ingress.yaml
+
+secretGenerator:
+  - name: auth-service-secret
+    namespace: toogle-master
+    envs:
+      - auth.env
+  - name: flag-service-secret
+    namespace: toogle-master
+    envs:
+      - flag.env
+  - name: targeting-service-secret
+    namespace: toogle-master
+    envs:
+      - targeting.env
+  - name: analytics-service-secret
+    namespace: toogle-master
+    envs:
+      - analytics.env
+      - .env.aws
+  - name: evaluation-service-secret
+    namespace: toogle-master
+    envs:
+      - evaluation.env
+      - .env.aws

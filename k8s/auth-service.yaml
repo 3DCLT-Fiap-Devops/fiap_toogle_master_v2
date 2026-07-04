@@ -7,19 +7,6 @@ data:
   PORT: "8001"
 
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: auth-service-secret
-  namespace: toogle-master
-type: Opaque
-data:
-  # Values are placeholders, must be replaced with real base64 values
-  # DATABASE_URL: cG9zdGdyZXM6Ly9kYnVzZXI6U2VuaGFUZXN0ZTEyM0BhdXRoLWRiLmMzZzZrbzhwbXF0Mi51cy1lYXN0LTEucmRzLmFtYXpvbmF3cy5jb206NTQzMi9hdXRoX2Ri
-  DATABASE_URL: cG9zdGdyZXM6Ly9kYnVzZXI6U2VuaGFUZXN0ZTEyM0BhdXRoLWRiLmMzZzZrbzhwbXF0Mi51cy1lYXN0LTEucmRzLmFtYXpvbmF3cy5jb206NTQzMi9hdXRoX2Ri
-  # MASTER_KEY: c3VhX2NoYXZlX21lc3RyYV9hcXVp
-  MASTER_KEY: c3VhX2NoYXZlX21lc3RyYV9hcXVp
-
 ---
 apiVersion: v1
 kind: Service

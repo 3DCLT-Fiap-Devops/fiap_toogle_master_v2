@@ -17,3 +17,8 @@ terraform.rc
 terraform/.terraform.lock.hcl
 terraform/.terraform.tfstate.lock.info
 deployment-summary.txt
+.env
+.env.*
+k8s/.env
+k8s/.env.*
+k8s/*.env

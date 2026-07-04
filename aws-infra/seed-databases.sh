@@ -1,22 +1,33 @@
 #!/bin/bash
 
 # Script to seed RDS databases using a temporary Docker container
-# This avoids the need for a local psql installation.
+# Reads database hosts directly from Kustomize .env configuration files.
 
-SUMMARY_FILE="deployment-summary.txt"
 DOCKER_SQL_DIR="../docker"
+K8S_DIR="../k8s"
 
-if [ ! -f "$SUMMARY_FILE" ]; then
-    echo "Error: $SUMMARY_FILE not found. Run generate-summary.sh first."
+if [ ! -d "$K8S_DIR" ]; then
+    K8S_DIR="k8s"
+    DOCKER_SQL_DIR="docker"
+fi
+
+if [ ! -f "$K8S_DIR/auth.env" ] || [ ! -f "$K8S_DIR/flag.env" ] || [ ! -f "$K8S_DIR/targeting.env" ]; then
+    echo "Error: K8s .env files not found in $K8S_DIR/. Run generate-summary.sh or deploy-helper.sh first."
     exit 1
 fi
 
-echo "Reading database configuration from $SUMMARY_FILE..."
+echo "Reading database configuration from K8s .env files..."
 
-# Extracting endpoints and credentials
-AUTH_DB_HOST=$(grep "RDS Auth-DB Endpoint:" "$SUMMARY_FILE" | awk '{print $4}')
-MAIN_DB_HOST=$(grep "RDS Main-DB Endpoint:" "$SUMMARY_FILE" | awk '{print $4}')
-TARGETING_DB_HOST=$(grep "RDS Targeting-DB Endpoint:" "$SUMMARY_FILE" | awk '{print $4}')
+# Function to parse DB host from DATABASE_URL env line
+parse_host() {
+    local env_file=$1
+    grep "DATABASE_URL=" "$env_file" | sed -n 's|.*@\(.*\):5432.*|\1|p'
+}
+
+AUTH_DB_HOST=$(parse_host "$K8S_DIR/auth.env")
+MAIN_DB_HOST=$(parse_host "$K8S_DIR/flag.env")
+TARGETING_DB_HOST=$(parse_host "$K8S_DIR/targeting.env")
+
 DB_USER="dbuser"
 DB_PASS="SenhaTeste123"
 
@@ -46,7 +57,6 @@ create_db_if_missing $TARGETING_DB_HOST "targeting_db"
 
 echo "--------------------------------------------------------"
 echo "Step 2: Seeding Auth Database (auth_db)..."
-# Use absolute paths and disable MSYS path conversion for Windows
 SQL_ABS_PATH=$(cd "$DOCKER_SQL_DIR" && pwd)
 
 MSYS_NO_PATHCONV=1 docker run --rm -v "$SQL_ABS_PATH:/sql" \

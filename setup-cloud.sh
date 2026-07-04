@@ -4,7 +4,7 @@
 # Provisions with Terraform and deploys application config using Kustomize in one go.
 
 set -e
-
+git submodule update --init --recursive
 echo "========================================================"
 echo "STARTING FULL AWS PROVISIONING AND DEPLOYMENT"
 echo "========================================================"

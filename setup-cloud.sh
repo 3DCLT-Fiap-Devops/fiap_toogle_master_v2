@@ -45,6 +45,7 @@ echo "========================================================"
 echo "INFRASTRUCTURE AND CONFIGURATION COMPLETE!"
 echo "========================================================"
 echo "Deploying to EKS..."
+kubectl apply -f "$ROOT_DIR/k8s/namespace.yaml"
 kubectl apply -f "$ROOT_DIR/k8s/"
 
 echo "Setup complete. You can access the application via the LoadBalancer DNS."
